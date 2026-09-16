@@ -1,21 +1,14 @@
 import os
 
-from dotenv import load_dotenv
 import psycopg
-
-
-load_dotenv()
 
 
 def get_connection():
     """
-    Cria uma conexão PostgreSQL/PostGIS.
+    Cria conexão com PostgreSQL/PostGIS.
 
-    Funciona tanto com:
-    - PostgreSQL local
-    - PostgreSQL/PostGIS online (Neon)
-
-    A configuração é controlada exclusivamente por variáveis de ambiente.
+    As credenciais são fornecidas exclusivamente
+    por variáveis de ambiente do servidor.
     """
 
     config = {
@@ -24,11 +17,12 @@ def get_connection():
         "dbname": os.getenv("DB_NAME"),
         "user": os.getenv("DB_USER"),
         "password": os.getenv("DB_PASSWORD"),
-        "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "15")),
+        "connect_timeout": int(
+            os.getenv("DB_CONNECT_TIMEOUT", "15")
+        ),
     }
 
-    # SSL é opcional no ambiente local e obrigatório no Neon.
-    sslmode = os.getenv("DB_SSLMODE", "").strip()
+    sslmode = os.getenv("DB_SSLMODE", "require").strip()
 
     if sslmode:
         config["sslmode"] = sslmode
@@ -37,14 +31,19 @@ def get_connection():
 
 
 def test_connection():
+    """
+    Teste simples de conexão.
+    Não retorna ou exibe credenciais.
+    """
+
     with get_connection() as conn:
         with conn.cursor() as cur:
+
             cur.execute(
                 """
                 SELECT
                     current_database(),
                     current_user,
-                    inet_server_addr(),
                     version();
                 """
             )
@@ -67,18 +66,21 @@ def test_connection():
 
 
 if __name__ == "__main__":
+
     banco, postgis = test_connection()
 
     print("=" * 80)
-    print("CONEXÃO COM POSTGRESQL/POSTGIS")
+    print("CONEXÃO POSTGRESQL/POSTGIS")
     print("=" * 80)
+
     print(f"Banco: {banco[0]}")
     print(f"Usuário: {banco[1]}")
-    print(f"Servidor: {banco[2]}")
-    print(f"PostgreSQL: {banco[3]}")
+    print(f"PostgreSQL: {banco[2]}")
 
     if postgis:
-        print(f"PostGIS: {postgis[0]} {postgis[1]}")
+        print(
+            f"PostGIS: {postgis[0]} {postgis[1]}"
+        )
     else:
         print("PostGIS: NÃO ENCONTRADO")
 
