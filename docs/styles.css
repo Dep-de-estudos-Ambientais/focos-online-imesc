@@ -100,3 +100,49 @@ canvas{box-sizing:border-box}
   .analytics .panel,.aligned-charts .panel{height:310px!important;min-height:310px!important;max-height:310px!important}
   .analytics .panel canvas,.aligned-charts .panel canvas,.compare-grid canvas{height:240px!important;max-height:240px!important}
 }
+
+/* =========================================================
+   V4 — ANÁLISE TÉCNICA, DENSIDADE E FOCO PRIORITÁRIO
+   ========================================================= */
+.report-text p{
+  text-align:justify;
+  text-justify:inter-word;
+  line-height:1.72;
+  hyphens:auto;
+}
+.report-text h3{font-size:15px;color:#263238}
+.report-text small{line-height:1.45}
+
+/* Pulsação leve somente para os poucos focos prioritários.
+   Usa transform/opacity, sem alterar dimensões do layout. */
+.priority-pulse{
+  animation:priorityPulseV4 1.35s ease-in-out infinite!important;
+  transform-origin:center center;
+  will-change:transform,opacity;
+}
+.priority-pulse:after{
+  display:block!important;
+  content:""!important;
+  position:absolute;
+  inset:-6px;
+  border:2px solid var(--risk);
+  border-radius:50%;
+  animation:priorityHaloV4 1.35s ease-out infinite!important;
+  pointer-events:none;
+}
+@keyframes priorityPulseV4{
+  0%,100%{transform:scale(.92);opacity:.78}
+  50%{transform:scale(1.18);opacity:1}
+}
+@keyframes priorityHaloV4{
+  0%{transform:scale(.55);opacity:.75}
+  100%{transform:scale(1.35);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .priority-pulse,.priority-pulse:after{animation:none!important}
+}
+
+.mapbiomas-note{font-size:10px;color:var(--muted);line-height:1.35;margin:6px 0 8px}
+.use-legend{display:grid;grid-template-columns:1fr;gap:3px;margin-top:6px}
+.use-legend span{display:flex;align-items:center;gap:6px;font-size:10px}
+.use-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;flex:0 0 auto}
