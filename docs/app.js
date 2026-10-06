@@ -12,7 +12,42 @@ function propName(p,type){const candidates=type==='mun'?['NM_MUN','municipio','M
 function riskColor(r){return {'CRITICO':'#c53a32','ALTO':'#e4772a','MEDIO':'#e0aa2f','BAIXO':'#63a85b','MINIMO':'#42a5a5'}[normalize(r)]||'#7b8794'}
 function isMA(f){return normalize(focusProps(f).estado)==='MARANHAO'}
 function initMap(){S.map=L.map('map',{preferCanvas:true,zoomAnimation:true,fadeAnimation:false,markerZoomAnimation:false}).setView([-5.2,-45],5);S.focusRenderer=L.canvas({padding:.35,tolerance:4});S.base.carto=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(S.map);S.base.sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'});S.layers.hillshade=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,opacity:.55,attribution:'Hillshade © Esri'});S.layers.focosNormal=L.layerGroup();S.layers.focosPriority=L.layerGroup();S.layers.focos=L.layerGroup([S.layers.focosNormal,S.layers.focosPriority]).addTo(S.map);S.layers.territoryHighlight=L.geoJSON(null,{style:{color:'#111',weight:4,fillColor:'#ffd54f',fillOpacity:.08}}).addTo(S.map)}
-function chart(id,type,entries,opts={}){if(S.charts[id])S.charts[id].destroy();const el=$(id);if(!el)return;const colors=opts.colors||entries.map(()=>'#f48a52');S.charts[id]=new Chart(el,{type,data:{labels:entries.map(x=>x[0]),datasets:[{data:entries.map(x=>x[1]),backgroundColor:type==='line'?undefined:colors,borderColor:type==='line'?'#f04d3f':colors,borderWidth:2,tension:.25,fill:false}]},options:{responsive:true,maintainAspectRatio:false,animation:false,resizeDelay:150,plugins:{legend:{display:opts.legend??(type==='doughnut'),position:'bottom'}},scales:type==='doughnut'?{}:{y:{beginAtZero:true}}}})}
+function chart(id,type,entries,opts={}){
+  const el=$(id);
+  if(!el)return;
+
+  const existing=Chart.getChart(el);
+  if(existing)existing.destroy();
+  if(S.charts[id]){
+    try{S.charts[id].destroy()}catch(_){}
+    delete S.charts[id];
+  }
+
+  const colors=opts.colors||entries.map(()=>'#f48a52');
+  S.charts[id]=new Chart(el,{
+    type,
+    data:{
+      labels:entries.map(x=>x[0]),
+      datasets:[{
+        data:entries.map(x=>x[1]),
+        backgroundColor:type==='line'?undefined:colors,
+        borderColor:type==='line'?'#f04d3f':colors,
+        borderWidth:2,
+        tension:.25,
+        fill:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false,
+      resizeDelay:250,
+      normalized:true,
+      plugins:{legend:{display:opts.legend??(type==='doughnut'),position:'bottom'}},
+      scales:type==='doughnut'?{}:{y:{beginAtZero:true}}
+    }
+  });
+}
 const RISK_COLORS={'CRITICO':'#c53a32','ALTO':'#e4772a','MEDIO':'#e0aa2f','BAIXO':'#63a85b','MINIMO':'#42a5a5','SEM DADO':'#7b8794'};
 function riskChartEntries(a){const order=['Crítico','Alto','Médio','Baixo','Mínimo','Sem dado'];const c=countBy(a,f=>focusProps(f).classe_risco);return order.map(k=>[k,c[k]||c[normalize(k)]||0]).filter(x=>x[1]>0)}
 function biomeColor(name){const n=normalize(name);if(n.includes('AMAZON'))return '#2e8b57';if(n.includes('CERRADO'))return '#e67e22';if(n.includes('CAATINGA'))return '#d4a72c';if(n.includes('MATA ATLANTICA'))return '#5aa469';if(n.includes('PANTANAL'))return '#3f8fc5';if(n.includes('PAMPA'))return '#9b8f55';return '#9aa3ad'}
@@ -50,10 +85,45 @@ function drawer(f){const p=focusProps(f),items=[['Município',p.municipio],['Est
 function analytics(){const a=S.filtered;const re=riskChartEntries(a);chart('riskChart','bar',re,{colors:re.map(x=>RISK_COLORS[normalize(x[0])]||'#7b8794')});const be=topEntries(countBy(a,f=>focusProps(f).bioma),10);chart('biomeChart','doughnut',be,{colors:be.map(x=>biomeColor(x[0])),legend:true});chart('useChart','bar',topEntries(countBy(a,f=>focusProps(f).uso_solo||focusProps(f).classe_mapbiomas),10));const se=topEntries(countBy(a,f=>satGroup(focusProps(f).satelite)),2);chart('satChart','bar',se,{colors:['#546e7a','#90a4ae']});const hours={};a.forEach(f=>{const d=new Date(focusProps(f).data_hora_local||focusProps(f).data_hora_utc);if(!isNaN(d)){const k=String(d.getHours()).padStart(2,'0')+'h';hours[k]=(hours[k]||0)+1}});chart('temporalChart','line',Object.entries(hours).sort((a,b)=>a[0].localeCompare(b[0])));if(S.env==='maranhao')chart('reliefChart','bar',topEntries(countBy(a,f=>focusProps(f).classe_relevo),10))}
 const REG={AC:'Norte',AP:'Norte',AM:'Norte',PA:'Norte',RO:'Norte',RR:'Norte',TO:'Norte',AL:'Nordeste',BA:'Nordeste',CE:'Nordeste',MA:'Nordeste',PB:'Nordeste',PE:'Nordeste',PI:'Nordeste',RN:'Nordeste',SE:'Nordeste',DF:'Centro-Oeste',GO:'Centro-Oeste',MT:'Centro-Oeste',MS:'Centro-Oeste',ES:'Sudeste',MG:'Sudeste',RJ:'Sudeste',SP:'Sudeste',PR:'Sul',RS:'Sul',SC:'Sul'};
 const UF={'ACRE':'AC','ALAGOAS':'AL','AMAPA':'AP','AMAZONAS':'AM','BAHIA':'BA','CEARA':'CE','DISTRITO FEDERAL':'DF','ESPIRITO SANTO':'ES','GOIAS':'GO','MARANHAO':'MA','MATO GROSSO':'MT','MATO GROSSO DO SUL':'MS','MINAS GERAIS':'MG','PARA':'PA','PARAIBA':'PB','PARANA':'PR','PERNAMBUCO':'PE','PIAUI':'PI','RIO DE JANEIRO':'RJ','RIO GRANDE DO NORTE':'RN','RIO GRANDE DO SUL':'RS','RONDONIA':'RO','RORAIMA':'RR','SANTA CATARINA':'SC','SAO PAULO':'SP','SERGIPE':'SE','TOCANTINS':'TO'};
-function comparisons(){if(S.env!=='brasil')return;const a=S.filtered;chart('stateChart','bar',topEntries(countBy(a,f=>focusProps(f).estado),10));chart('munChart','bar',topEntries(countBy(a,f=>focusProps(f).municipio),10));chart('regionChart','bar',topEntries(countBy(a,f=>REG[UF[normalize(focusProps(f).estado)]]||'Sem região'),5))}
+function destroyChart(id){
+  const el=$(id);
+  const existing=el?Chart.getChart(el):null;
+  if(existing)existing.destroy();
+  if(S.charts[id]){
+    try{S.charts[id].destroy()}catch(_){}
+    delete S.charts[id];
+  }
+}
+function comparisons(){
+  if(S.env!=='brasil'){
+    ['stateChart','munChart','regionChart'].forEach(destroyChart);
+    return;
+  }
+  const a=S.filtered;
+  chart('stateChart','bar',topEntries(countBy(a,f=>focusProps(f).estado),10));
+  chart('munChart','bar',topEntries(countBy(a,f=>focusProps(f).municipio),10));
+  chart('regionChart','bar',topEntries(countBy(a,f=>REG[UF[normalize(focusProps(f).estado)]]||'Sem região'),5));
+}
 function protectedTables(){const a=S.filtered,table=(obj)=>`<table><thead><tr><th>Área</th><th>Focos</th></tr></thead><tbody>${topEntries(obj,20).map(x=>`<tr><td>${x[0]}</td><td>${nf.format(x[1])}</td></tr>`).join('')}</tbody></table>`;$('ucTable').innerHTML=table(countBy(a.filter(f=>focusProps(f).em_unidade_conservacao),f=>focusProps(f).unidade_conservacao_nome));$('tiTable').innerHTML=table(countBy(a.filter(f=>focusProps(f).em_terra_indigena),f=>focusProps(f).terra_indigena_nome))}
 function events(){const ev={};S.filtered.filter(f=>focusProps(f).dentro_evento_fogo).forEach(f=>{const p=focusProps(f),id=p.id_evento_fogo||'Evento sem ID';if(!ev[id])ev[id]={n:0,status:p.status_evento_fogo,tipo:p.tipo_evento_fogo};ev[id].n++});$('events').innerHTML=Object.entries(ev).sort((a,b)=>b[1].n-a[1].n).slice(0,12).map(([id,x])=>`<div class="event"><b>${id}</b><small>${x.tipo||'Evento de fogo'}</small><strong>${nf.format(x.n)} focos</strong><small>${x.status||'—'}</small></div>`).join('')||'<small>Nenhum foco do recorte está associado a evento.</small>'}
-function renderAll(){cards();renderFocos();analytics();comparisons();if(S.env==='maranhao')protectedTables();events();if(S.layers.choro&&S.map.hasLayer(S.layers.choro))drawChoropleth()}
+let renderQueued=false;
+function renderAll(){
+  if(renderQueued)return;
+  renderQueued=true;
+  requestAnimationFrame(()=>{
+    try{
+      cards();
+      renderFocos();
+      analytics();
+      comparisons();
+      if(S.env==='maranhao')protectedTables();
+      events();
+      if(S.layers.choro&&S.map.hasLayer(S.layers.choro))drawChoropleth();
+    }finally{
+      renderQueued=false;
+    }
+  });
+}
 async function loadGeo(key){if(S.geo[key])return S.geo[key];const r=await fetch(PATH[key]);if(!r.ok)throw new Error(`${PATH[key]}: ${r.status}`);S.geo[key]=await r.json();return S.geo[key]}
 async function toggleGeo(key,on,style,nameType){if(S.layers[key]){if(on)S.layers[key].addTo(S.map);else S.map.removeLayer(S.layers[key]);return}if(!on)return;try{const g=await loadGeo(key);S.layers[key]=L.geoJSON(g,{style, onEachFeature:(f,l)=>{const n=propName(featureProps(f),nameType);l.bindTooltip(n,{sticky:true,className:'territory-label'})}}).addTo(S.map)}catch(e){alert('Não foi possível carregar '+PATH[key]+'\n'+e.message)}}
 async function drawChoropleth(){try{const g=await loadGeo('mun');if(S.layers.choro)S.map.removeLayer(S.layers.choro);const counts=countBy((S.env==='maranhao'?S.all.filter(isMA):S.filtered),f=>normalize(focusProps(f).municipio));S.layers.choro=L.geoJSON(g,{style:f=>{const n=counts[normalize(propName(featureProps(f),'mun'))]||0;const c=n>50?'#a50f15':n>20?'#de2d26':n>10?'#fb6a4a':n>5?'#fcae91':n>0?'#fdd0c2':'#fff5f0';return{color:'#fff',weight:1,fillColor:c,fillOpacity:.72}},onEachFeature:(f,l)=>{const name=propName(featureProps(f),'mun'),n=counts[normalize(name)]||0;l.bindTooltip(`${name}: ${nf.format(n)} focos`,{sticky:true})}});if($('choroOn').checked)S.layers.choro.addTo(S.map)}catch(e){alert('Erro na malha municipal: '+e.message)}}
