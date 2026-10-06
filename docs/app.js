@@ -19,6 +19,21 @@ function propName(p,type){
   return 'Sem nome';
 }
 function riskColor(r){return {'CRITICO':'#c53a32','ALTO':'#e4772a','MEDIO':'#e0aa2f','BAIXO':'#63a85b','MINIMO':'#42a5a5'}[normalize(r)]||'#7b8794'}
+function landUseColor(v){
+  const n=normalize(v);
+  if(n.includes('FLOREST'))return '#1f8d49';
+  if(n.includes('SAVAN'))return '#7dc975';
+  if(n.includes('CAMPEST'))return '#d6bc74';
+  if(n.includes('PASTAG'))return '#edde8e';
+  if(n.includes('AGRIC')||n.includes('LAVOUR'))return '#c762c3';
+  if(n.includes('URBAN'))return '#d64541';
+  if(n.includes('AGUA')||n.includes('RIO')||n.includes('LAGO')||n.includes('OCEANO'))return '#2563eb';
+  if(n.includes('MOSAICO'))return '#ffefc3';
+  if(n.includes('SILVIC'))return '#7a5900';
+  if(n.includes('ALAG'))return '#45c2a5';
+  return '#9aa3ad';
+}
+function focusColor(p){return $('usoSoloOn')?.checked?landUseColor(p.uso_solo||p.classe_mapbiomas):riskColor(p.classe_risco)}
 function isMA(f){return normalize(focusProps(f).estado)==='MARANHAO'}
 
 function initMap(){
@@ -164,7 +179,7 @@ function renderFocos(){
     if(priority){
       m=L.marker([lat,lon],{interactive:true,keyboard:false,icon:L.divIcon({className:'priority-wrap',html:`<span class="priority-pulse" style="--risk:${riskColor(p.classe_risco)}"></span>`,iconSize:[20,20],iconAnchor:[10,10]})});
     }else{
-      m=L.circleMarker([lat,lon],{renderer:S.focusRenderer,radius:5,color:'#fff',weight:1,fillColor:riskColor(p.classe_risco),fillOpacity:.9});
+      m=L.circleMarker([lat,lon],{renderer:S.focusRenderer,radius:5,color:'#fff',weight:1,fillColor:focusColor(p),fillOpacity:.9});
     }
     m.on('click',()=>{m.bindPopup(popupHtml(p),{maxWidth:320}).openPopup();if(S.env==='maranhao')drawer(f)});
     m.addTo(priority?S.layers.focosPriority:S.layers.focosNormal);
@@ -178,29 +193,23 @@ function renderHeat(){
   const pts=S.filtered
     .filter(f=>Array.isArray(f.geometry?.coordinates)&&Number.isFinite(f.geometry.coordinates[0])&&Number.isFinite(f.geometry.coordinates[1]))
     .map(f=>[f.geometry.coordinates[1],f.geometry.coordinates[0],1]);
-  S.layers.heat=L.heatLayer(pts,{radius:18,blur:20});
+  S.layers.heat=L.heatLayer(pts,{radius:26,blur:18,maxZoom:11,minOpacity:.38,gradient:{0.15:'#2c7bb6',0.35:'#00a6ca',0.5:'#ffff8c',0.7:'#fdae61',0.85:'#f46d43',1:'#d7191c'}});
   if($('kernelOn')?.checked)S.layers.heat.addTo(S.map)
 }
 
 function drawer(f){
   const p=focusProps(f);
-  const items=[
-    ['Município',p.municipio],['Estado',p.estado],['Data/hora',fmtDate(p.data_hora_local)],
-    ['Idade do foco',p.classe_idade_foco||((p.idade_foco_horas!=null)?Number(p.idade_foco_horas).toFixed(1)+' h':'—')],
-    ['Satélite',p.satelite],['Risco',p.classe_risco],['Índice de risco de fogo',p.risco_fogo_enriquecido],
-    ['PRF (MW)',p.prf_mw],['Classe PRF',p.classe_prf],['Bioma',p.bioma],
-    ['Uso do solo',p.uso_solo||p.classe_mapbiomas],['Evento',p.id_evento_fogo],['Status evento',p.status_evento_fogo],
-    ['Elevação (m)',p.elevacao_m],['Declividade (°)',p.declividade_graus],['Relevo',p.classe_relevo],
-    ['Terra Indígena',p.terra_indigena_nome],['Unidade de Conservação',p.unidade_conservacao_nome],
-    ['Rodovia próxima',p.rodovia_mais_proxima],['Dist. rodovia (m)',p.distancia_rodovia_m],
-    ['Linha de energia',p.linha_energia_mais_proxima],['Dist. energia (m)',p.distancia_linha_energia_m]
-  ];
-  const ctx500=p.descricao_uso_solo_500m||p.descricao_terreno_500m||p.uso_solo_predominante_500m;
-  const txt=`O foco foi identificado em ${p.municipio||'município não informado'}, ${p.estado||''}, em ${fmtDate(p.data_hora_local)}, pelo satélite ${p.satelite||'não informado'}. Apresenta risco ${p.classe_risco||'sem classificação'} e PRF de ${p.prf_mw??'valor não disponível'} MW (${p.classe_prf||'sem classificação'}). O ponto ocorre em ${p.uso_solo||p.classe_mapbiomas||'classe de uso do solo não informada'}, no bioma ${p.bioma||'não informado'}, com relevo ${p.classe_relevo||'não informado'}.${p.dentro_evento_fogo?` Está associado ao evento de fogo ${p.id_evento_fogo||''} (${p.status_evento_fogo||'status não informado'}).`:''}${p.em_terra_indigena?` Localiza-se na Terra Indígena ${p.terra_indigena_nome||''}.`:''}${p.em_unidade_conservacao?` Localiza-se na Unidade de Conservação ${p.unidade_conservacao_nome||''}.`:''}${ctx500?` No contexto de 500 metros: ${ctx500}.`:''}`;
-  if($('drawerContent'))$('drawerContent').innerHTML=`<h2>Ficha do foco</h2>${isPriority(p)?'<div class="priority-banner">⚠ Atenção: risco Alto/Crítico + PRF ≥ 200 MW + associação a evento de fogo.</div>':''}<div class="detail-grid">${items.map(x=>`<div class="detail"><b>${x[0]}</b>${x[1]??'—'}</div>`).join('')}</div><section class="report-text"><h3>Descrição para relatório</h3><p>${txt}</p>${!ctx500?'<small>O detalhamento do buffer de 500 m será exibido automaticamente quando os campos de contexto de 500 m forem incluídos no GeoJSON de publicação.</small>':''}</section>`;
-  $('drawer')?.classList.add('open')
+  const items=[['Município',p.municipio],['Estado',p.estado],['Data/hora',fmtDate(p.data_hora_local)],['Idade do foco',p.classe_idade_foco||((p.idade_foco_horas!=null)?Number(p.idade_foco_horas).toFixed(1)+' h':'—')],['Satélite',p.satelite],['Risco',p.classe_risco],['Índice de risco de fogo',p.risco_fogo_enriquecido],['PRF (MW)',p.prf_mw],['Classe PRF',p.classe_prf],['Bioma',p.bioma],['Uso do solo',p.uso_solo||p.classe_mapbiomas],['Evento',p.id_evento_fogo],['Status evento',p.status_evento_fogo],['Elevação (m)',p.elevacao_m],['Declividade (°)',p.declividade_graus],['Relevo',p.classe_relevo],['Terra Indígena',p.terra_indigena_nome],['Unidade de Conservação',p.unidade_conservacao_nome],['Rodovia próxima',p.rodovia_mais_proxima],['Dist. rodovia (m)',p.distancia_rodovia_m],['Linha de energia',p.linha_energia_mais_proxima],['Dist. energia (m)',p.distancia_linha_energia_m]];
+  const ctx500=p.descricao_uso_solo_500m||p.descricao_terreno_500m||p.uso_solo_predominante_500m||p.contexto_500m;
+  const idade=p.classe_idade_foco?` classificado temporalmente como ${p.classe_idade_foco.toLowerCase()}`:'';
+  const evento=p.dentro_evento_fogo?` O registro encontra-se espacialmente associado ao evento de fogo ${p.id_evento_fogo||'identificado pelo sistema'}, com situação ${p.status_evento_fogo||'não informada'}, aspecto que reforça a necessidade de acompanhamento da persistência e da evolução espacial da ocorrência.`:` Não foi identificada associação do ponto, no recorte publicado, com evento de fogo monitorado.`;
+  const territorial=p.em_terra_indigena?` O ponto está inserido na Terra Indígena ${p.terra_indigena_nome||'identificada na base territorial'}.`:p.em_unidade_conservacao?` O ponto está inserido na Unidade de Conservação ${p.unidade_conservacao_nome||'identificada na base territorial'}.`:'';
+  const contexto=ctx500?` A caracterização espacial do entorno de 500 metros indica ${ctx500}, informação utilizada como elemento complementar para interpretação das condições locais de cobertura e do contexto ambiental imediato.`:` A caracterização detalhada do entorno de 500 metros não está disponível no GeoJSON desta publicação; sua inclusão ocorrerá automaticamente quando os campos de contexto forem incorporados à exportação web.`;
+  const prioridade=isPriority(p)?` Considerando conjuntamente a classe de risco ${p.classe_risco}, a Potência Radiativa do Fogo (PRF) de ${p.prf_mw??'—'} MW e a inserção em evento de fogo, o registro é classificado pela plataforma como foco prioritário para acompanhamento operacional. Essa classificação constitui um indicador de atenção e não, isoladamente, confirmação de incêndio florestal.`:'';
+  const txt=`No âmbito do monitoramento de focos de calor, foi identificado registro no município de ${p.municipio||'não informado'}, ${p.estado||'unidade federativa não informada'}, em ${fmtDate(p.data_hora_local)}, pelo satélite ${p.satelite||'não informado'}${idade}. O foco apresenta índice de risco de fogo ${p.risco_fogo_enriquecido??'não disponível'}, enquadrado na classe ${p.classe_risco||'sem classificação'}, e Potência Radiativa do Fogo (PRF) de ${p.prf_mw??'valor não disponível'} MW, correspondente à classe ${p.classe_prf||'não informada'}. Quanto ao contexto ambiental, o ponto está associado à classe de uso e cobertura da terra ${p.uso_solo||p.classe_mapbiomas||'não informada'}, no bioma ${p.bioma||'não informado'}, e apresenta condição de relevo ${p.classe_relevo||'não informada'}.${evento}${territorial} ${contexto}${prioridade}`;
+  $('drawerContent').innerHTML=`<h2>Ficha do foco</h2>${isPriority(p)?'<div class="priority-banner">⚠ Foco prioritário: risco Alto/Crítico + PRF ≥ 200 MW + associação a evento de fogo.</div>':''}<div class="detail-grid">${items.map(x=>`<div class="detail"><b>${x[0]}</b>${x[1]??'—'}</div>`).join('')}</div><section class="report-text"><h3>Análise técnica do registro</h3><p>${txt}</p><small>Texto gerado automaticamente a partir dos atributos disponíveis na base operacional da plataforma. Recomenda-se validação técnica antes de sua incorporação em documento oficial.</small></section>`;
+  $('drawer').classList.add('open');
 }
-
 function analytics(){
   const a=S.filtered;
   const re=riskChartEntries(a);
@@ -413,7 +422,7 @@ function wire(){
     applyFilters()
   };
   if($('focosOn'))$('focosOn').onchange=e=>e.target.checked?S.layers.focos.addTo(S.map):S.map.removeLayer(S.layers.focos);
-  if($('kernelOn'))$('kernelOn').onchange=renderHeat;
+  if($('kernelOn'))$('kernelOn').onchange=renderHeat;$('usoSoloOn').onchange=renderFocos;
   if($('eventActiveOn'))$('eventActiveOn').onchange=e=>toggleEventLayer('active',e.target.checked);
   if($('eventObsOn'))$('eventObsOn').onchange=e=>toggleEventLayer('obs',e.target.checked);
   if($('hillshadeOn'))$('hillshadeOn').onchange=e=>e.target.checked?S.layers.hillshade.addTo(S.map):S.map.removeLayer(S.layers.hillshade);
