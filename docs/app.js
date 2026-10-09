@@ -39,14 +39,18 @@ function isMA(f){return normalize(focusProps(f).estado)==='MARANHAO'}
 
 function initMap(){
   S.map=L.map('map',{preferCanvas:true,zoomAnimation:true,fadeAnimation:false,markerZoomAnimation:false}).setView([-5.2,-45],5);
-  S.focusRenderer=L.canvas({padding:.35,tolerance:4});
+  // Hierarquia fixa: nenhum polígono ou linha fica acima dos focos.
+  S.map.createPane('dadosTerritoriais'); S.map.getPane('dadosTerritoriais').style.zIndex=410;
+  S.map.createPane('focosPane'); S.map.getPane('focosPane').style.zIndex=640;
+  S.map.createPane('prioridadePane'); S.map.getPane('prioridadePane').style.zIndex=650;
+  S.focusRenderer=L.canvas({pane:'focosPane',padding:.35,tolerance:7});
   S.base.carto=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(S.map);
   S.base.sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'});
   S.layers.hillshade=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,opacity:.55,attribution:'Hillshade © Esri'});
   S.layers.focosNormal=L.layerGroup();
   S.layers.focosPriority=L.layerGroup();
   S.layers.focos=L.layerGroup([S.layers.focosNormal,S.layers.focosPriority]).addTo(S.map);
-  S.layers.territoryHighlight=L.geoJSON(null,{interactive:false,style:{color:'#111',weight:4,fillColor:'#ffd54f',fillOpacity:.08}}).addTo(S.map);
+  S.layers.territoryHighlight=L.geoJSON(null,{pane:'dadosTerritoriais',interactive:false,style:{color:'#111',weight:4,fillColor:'#ffd54f',fillOpacity:.08}}).addTo(S.map);
 }
 
 /* Gráficos com tamanho fixo: evita ciclo de ResizeObserver / crescimento infinito */
@@ -170,8 +174,9 @@ function popupHtml(p){
 }
 
 function bringFocosForward(){
-  if(S.layers.focos && S.map.hasLayer(S.layers.focos)){S.layers.focos.removeFrom(S.map);S.layers.focos.addTo(S.map)}
-  if(S.layers.focosPriority)S.layers.focosPriority.eachLayer(l=>{if(l.setZIndexOffset)l.setZIndexOffset(1000)});
+  // A ordem dos panes é permanente. Não remova/reinsira 40 mil marcadores.
+  S.map.getPane('focosPane').style.zIndex=640;
+  S.map.getPane('prioridadePane').style.zIndex=650;
 }
 function renderFocos(){
   S.layers.focosNormal.clearLayers();
@@ -182,11 +187,11 @@ function renderFocos(){
     const p=focusProps(f),priority=isPriority(p);
     let m;
     if(priority){
-      m=L.marker([lat,lon],{interactive:true,keyboard:false,icon:L.divIcon({className:'priority-wrap',html:`<span class="priority-pulse" style="--risk:${riskColor(p.classe_risco)}"></span>`,iconSize:[20,20],iconAnchor:[10,10]})});
+      m=L.marker([lat,lon],{pane:'prioridadePane',interactive:true,keyboard:false,icon:L.divIcon({className:'priority-wrap',html:`<span class="priority-pulse" style="--risk:${riskColor(p.classe_risco)}"></span>`,iconSize:[20,20],iconAnchor:[10,10]})});
     }else{
       m=L.circleMarker([lat,lon],{renderer:S.focusRenderer,radius:5,color:'#fff',weight:1,fillColor:focusColor(p),fillOpacity:.9});
     }
-    m.on('click',()=>{m.bindPopup(popupHtml(p),{maxWidth:320}).openPopup();if(S.env==='maranhao')drawer(f)});
+    m.on('click',()=>{m.bindPopup(popupHtml(p),{maxWidth:320}).openPopup();drawer(f)});
     m.addTo(priority?S.layers.focosPriority:S.layers.focosNormal);
   }
   bringFocosForward();
@@ -199,7 +204,7 @@ function renderHeat(){
   const pts=S.filtered
     .filter(f=>Array.isArray(f.geometry?.coordinates)&&Number.isFinite(f.geometry.coordinates[0])&&Number.isFinite(f.geometry.coordinates[1]))
     .map(f=>[f.geometry.coordinates[1],f.geometry.coordinates[0],1]);
-  S.layers.heat=L.heatLayer(pts,{radius:26,blur:18,maxZoom:11,minOpacity:.38,gradient:{0.15:'#2c7bb6',0.35:'#00a6ca',0.5:'#ffff8c',0.7:'#fdae61',0.85:'#f46d43',1:'#d7191c'}});
+  S.layers.heat=L.heatLayer(pts,{pane:'dadosTerritoriais',radius:26,blur:18,maxZoom:11,minOpacity:.38,gradient:{0.15:'#2c7bb6',0.35:'#00a6ca',0.5:'#ffff8c',0.7:'#fdae61',0.85:'#f46d43',1:'#d7191c'}});
   if($('kernelOn')?.checked)S.layers.heat.addTo(S.map)
 }
 
@@ -269,7 +274,7 @@ function renderAll(){
   comparisons();
   if(S.env==='maranhao')protectedTables();
   events();
-  if(S.layers.choro&&S.map.hasLayer(S.layers.choro))drawChoropleth()
+  if($('choroOn')?.checked)drawChoropleth()
 }
 
 async function loadGeo(key){
@@ -288,7 +293,7 @@ async function toggleGeo(key,on,style,nameType){
   if(!on)return;
   try{
     const g=await loadGeo(key);
-    S.layers[key]=L.geoJSON(g,{interactive:false,style,onEachFeature:(f,l)=>{const n=propName(featureProps(f),nameType);l.bindTooltip(n,{sticky:true,className:'territory-label'})}}).addTo(S.map);bringFocosForward()
+    S.layers[key]=L.geoJSON(g,{pane:'dadosTerritoriais',interactive:false,style,onEachFeature:(f,l)=>{const n=propName(featureProps(f),nameType);l.bindTooltip(n,{sticky:true,className:'territory-label'})}}).addTo(S.map);bringFocosForward()
   }catch(e){
     alert('Não foi possível carregar '+PATH[key]+'\n'+e.message)
   }
@@ -298,9 +303,9 @@ async function drawChoropleth(){
   try{
     const g=await loadGeo('mun');
     if(S.layers.choro)S.map.removeLayer(S.layers.choro);
-    const counts=countBy((S.env==='maranhao'?S.all.filter(isMA):S.filtered),f=>normalize(focusProps(f).municipio));
+    const counts=countBy(S.filtered,f=>normalize(focusProps(f).municipio));
     S.layers.choro=L.geoJSON(g,{
-      interactive:false,
+      pane:'dadosTerritoriais',interactive:false,
       style:f=>{
         const n=counts[normalize(propName(featureProps(f),'mun'))]||0;
         const c=n>50?'#a50f15':n>20?'#de2d26':n>10?'#fb6a4a':n>5?'#fcae91':n>0?'#fdd0c2':'#fff5f0';
@@ -385,7 +390,7 @@ async function toggleEventLayer(kind,on){
     const g=await loadGeo(key);
     const active=kind==='active';
     S.layers[key]=L.geoJSON(g,{
-      filter:f=>{const p=featureProps(f);return normalize(val(p,'estados','estado','UF','uf')||'').includes('MARANHAO') || /(^|[,;\s])MA([,;\s]|$)/.test(normalize(val(p,'estados','estado','UF','uf')||''))},
+      pane:'dadosTerritoriais',filter:f=>{const p=featureProps(f);return normalize(val(p,'estados','estado','UF','uf')||'').includes('MARANHAO') || /(^|[,;\s])MA([,;\s]|$)/.test(normalize(val(p,'estados','estado','UF','uf')||''))},
       interactive:false,
       style:{color:active?'#c62828':'#ef6c00',weight:2,dashArray:active?null:'7,5',fillColor:active?'#ef5350':'#ffb74d',fillOpacity:.10},
       onEachFeature:(f,l)=>{
