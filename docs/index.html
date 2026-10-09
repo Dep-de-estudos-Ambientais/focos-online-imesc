@@ -4,7 +4,7 @@
 <header><div class="brand"><img src="assets/logo_dea.png" alt="DEA"><div><small>DEPARTAMENTO DE ESTUDOS AMBIENTAIS — IMESC</small><h1>Monitoramento de Focos de Calor</h1><small id="updated">Carregando atualização...</small></div></div><div id="statusBadge" class="badge">● Aguardando dados</div></header>
 <main>
 <section class="toolbar">
-<div><b>Ambiente</b><button data-env="brasil">Brasil</button><button data-env="maranhao" class="active">Maranhão</button></div>
+<div class="env-switch"><b>Ambiente</b><button data-env="brasil">Brasil</button><button data-env="maranhao" class="active">Maranhão</button></div>
 <label>Estado<select id="estado"><option value="">Todos</option></select></label><label>Município<select id="municipio"><option value="">Todos</option></select></label><label>Risco<select id="risco"><option value="">Todos</option></select></label><label>Bioma<select id="bioma"><option value="">Todos</option></select></label>
 <label>PRF<select id="prf"><option value="">Todas</option><option value="alta">≥ 200 MW</option><option value="muitoalta">≥ 500 MW</option><option value="extrema">≥ 1.000 MW</option></select></label>
 <label>Satélite<select id="satelite"></select></label><label>Recência<select id="recencia"><option value="">Todas</option><option value="recente">0–3 h</option><option value="observado">3–10 h</option><option value="antigo">10–24 h</option></select></label>
@@ -14,10 +14,8 @@
 <section class="mapsec"><aside class="layers">
 <h3>Visualização</h3><label><input id="focosOn" type="checkbox" checked> Focos de calor</label><label><input id="kernelOn" type="checkbox"> Densidade</label>
 
-
-
 <h3>Eventos de fogo — INPE</h3><label><input id="eventActiveOn" type="checkbox"> Eventos ativos</label><label><input id="eventObsOn" type="checkbox"> Eventos em observação</label><small id="eventLayerStatus">Eventos: aguardando ativação</small>
-<h3>Risco de fogo</h3><div class="legendbox"><span><i class="critico"></i>Crítico</span><span><i class="alto"></i>Alto</span><span><i class="medio"></i>Médio</span><span><i class="baixo"></i>Baixo</span><span><i class="minimo"></i>Mínimo</span><span><i class="sem"></i>Sem dado</span></div>
+<h3>Risco de fogo</h3><div class="legendbox" aria-label="Legenda de risco de fogo"><span><i class="critico"></i>Crítico</span><span><i class="alto"></i>Alto</span><span><i class="medio"></i>Médio</span><span><i class="baixo"></i>Baixo</span><span><i class="minimo"></i>Mínimo</span><span><i class="sem"></i>Sem dado</span></div>
 <h3>Meio físico</h3><label><input id="hillshadeOn" type="checkbox"> Relevo / Hillshade</label>
 <h3>Mapa-base</h3><label><input type="radio" name="base" value="carto" checked> Cartográfico</label><label><input type="radio" name="base" value="sat"> Satélite</label>
 <div id="maLayerMenu" class="hidden"><h3>Divisão territorial</h3><label><input id="municipiosOn" type="checkbox"> Limites municipais</label><label><input id="choroOn" type="checkbox"> Coroplético — focos por município</label><h3>Áreas protegidas</h3><label><input id="ucFedOn" type="checkbox"> UCs federais <span class="line-key uc-fed"></span></label><label><input id="ucEstOn" type="checkbox"> UCs estaduais <span class="line-key uc-est"></span></label><label><input id="tiOn" type="checkbox"> Terras Indígenas</label><h3>Infraestrutura</h3><label><input id="roadsOn" type="checkbox"> Rodovias</label><label><input id="energyOn" type="checkbox"> Linhas de transmissão</label></div>
