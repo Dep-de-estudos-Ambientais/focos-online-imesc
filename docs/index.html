@@ -4,7 +4,7 @@
 <header><div class="brand"><img src="assets/logo_dea.png" alt="DEA"><div><small>DEPARTAMENTO DE ESTUDOS AMBIENTAIS — IMESC</small><h1>Monitoramento de Focos de Calor</h1><small id="updated">Carregando atualização...</small></div></div><div id="statusBadge" class="badge">● Aguardando dados</div></header>
 <main>
 <section class="toolbar">
-<div><b>Ambiente</b><button data-env="brasil" class="active">Brasil</button><button data-env="maranhao">Maranhão</button></div>
+<div><b>Ambiente</b><button data-env="brasil">Brasil</button><button data-env="maranhao" class="active">Maranhão</button></div>
 <label>Estado<select id="estado"><option value="">Todos</option></select></label><label>Município<select id="municipio"><option value="">Todos</option></select></label><label>Risco<select id="risco"><option value="">Todos</option></select></label><label>Bioma<select id="bioma"><option value="">Todos</option></select></label>
 <label>PRF<select id="prf"><option value="">Todas</option><option value="alta">≥ 200 MW</option><option value="muitoalta">≥ 500 MW</option><option value="extrema">≥ 1.000 MW</option></select></label>
 <label>Satélite<select id="satelite"></select></label><label>Recência<select id="recencia"><option value="">Todas</option><option value="recente">0–3 h</option><option value="observado">3–10 h</option><option value="antigo">10–24 h</option></select></label>
@@ -13,9 +13,9 @@
 <section id="cards" class="cards"></section>
 <section class="mapsec"><aside class="layers">
 <h3>Visualização</h3><label><input id="focosOn" type="checkbox" checked> Focos de calor</label><label><input id="kernelOn" type="checkbox"> Densidade</label>
-<label><input id="usoSoloOn" type="checkbox"> Focos por uso/cobertura — MapBiomas 2025</label>
-<div class="mapbiomas-note">A opção colore os focos pela classe MapBiomas 2025 já associada a cada registro. A camada raster contínua de 10 m não é carregada diretamente no navegador.</div>
-<div class="use-legend"><span><i style="background:#1f8d49"></i>Formação Florestal</span><span><i style="background:#7dc975"></i>Formação Savânica</span><span><i style="background:#edde8e"></i>Pastagem</span><span><i style="background:#c762c3"></i>Agricultura/Lavoura</span><span><i style="background:#2563eb"></i>Água</span></div>
+
+
+
 <h3>Eventos de fogo — INPE</h3><label><input id="eventActiveOn" type="checkbox"> Eventos ativos</label><label><input id="eventObsOn" type="checkbox"> Eventos em observação</label><small id="eventLayerStatus">Eventos: aguardando ativação</small>
 <h3>Risco de fogo</h3><div class="legendbox"><span><i class="critico"></i>Crítico</span><span><i class="alto"></i>Alto</span><span><i class="medio"></i>Médio</span><span><i class="baixo"></i>Baixo</span><span><i class="minimo"></i>Mínimo</span><span><i class="sem"></i>Sem dado</span></div>
 <h3>Meio físico</h3><label><input id="hillshadeOn" type="checkbox"> Relevo / Hillshade</label>
