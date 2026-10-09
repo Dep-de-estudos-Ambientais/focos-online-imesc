@@ -146,3 +146,11 @@ canvas{box-sizing:border-box}
 .use-legend{display:grid;grid-template-columns:1fr;gap:3px;margin-top:6px}
 .use-legend span{display:flex;align-items:center;gap:6px;font-size:10px}
 .use-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;flex:0 0 auto}
+
+/* Ajustes V4.1 */
+.toolbar [data-env]{font-weight:800;font-size:14px;padding:11px 17px;border:2px solid #b9c5cd;background:#f4f7f9;color:#263238;box-shadow:0 2px 5px #0001}
+.toolbar [data-env].active{background:#a52822;color:#fff;border-color:#a52822;box-shadow:0 2px 8px #a5282240}
+.legendbox{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px}
+.legendbox span{display:flex!important;align-items:center;gap:5px;white-space:nowrap}
+.priority-pulse{animation:priorityPulseV4 1.35s ease-in-out infinite!important}
+.priority-pulse:after{display:block!important;content:""!important;animation:priorityHaloV4 1.35s ease-out infinite!important}
