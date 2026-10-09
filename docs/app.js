@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id), nf=new Intl.NumberFormat('pt-BR');
 const PATH={mun:'camadas/Malha Municipal territorial.geojson',ti:'camadas/Terras Indigenas.geojson',road:'camadas/Trechos de Rodovias.geojson',energy:'camadas/Trechos de Linhas de Transmissão.geojson',ucEst:'camadas/Unidades de Conservação Estaduais.geojson',ucFed:'camadas/Unidades de Conservação Federais.geojson',eventActive:'data/eventos_ativos.geojson',eventObs:'data/eventos_observacao.geojson'};
-const S={env:'brasil',all:[],filtered:[],status:null,map:null,layers:{},base:{},charts:{},geo:{},territory:null};
+const S={env:'maranhao',all:[],filtered:[],status:null,map:null,layers:{},base:{},charts:{},geo:{},territory:null};
 const normalize=s=>(s??'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
 const val=(p,...keys)=>{for(const k of keys)if(p?.[k]!==undefined&&p[k]!==null&&p[k]!=='')return p[k];return null};
 const featureProps=f=>f?.properties||{};
@@ -13,6 +13,7 @@ function propName(p,type){
   const candidates=type==='mun'?['NM_MUN','municipio','MUNICIPIO','nome','NOME','name']:
     type==='ti'?['terrai_nom','terra_indigena_nome','nome','NOME','name']:
     type==='uc'?['nome_uc','NOME_UC','nome','NOME','name']:
+    type==='road'?['sigla','SIGLA','rodovia','RODOVIA','br','BR','codigo','CODIGO','nome','NOME','name']:
     ['nome','NOME','name','sigla','SIGLA'];
   for(const k of candidates)if(p?.[k])return p[k];
   for(const [k,v] of Object.entries(p||{}))if(typeof v==='string'&&/nome|name|municip/i.test(k)&&v)return v;
@@ -45,7 +46,7 @@ function initMap(){
   S.layers.focosNormal=L.layerGroup();
   S.layers.focosPriority=L.layerGroup();
   S.layers.focos=L.layerGroup([S.layers.focosNormal,S.layers.focosPriority]).addTo(S.map);
-  S.layers.territoryHighlight=L.geoJSON(null,{style:{color:'#111',weight:4,fillColor:'#ffd54f',fillOpacity:.08}}).addTo(S.map);
+  S.layers.territoryHighlight=L.geoJSON(null,{interactive:false,style:{color:'#111',weight:4,fillColor:'#ffd54f',fillOpacity:.08}}).addTo(S.map);
 }
 
 /* Gráficos com tamanho fixo: evita ciclo de ResizeObserver / crescimento infinito */
@@ -168,6 +169,10 @@ function popupHtml(p){
   return `<b>${p.municipio||'—'} / ${p.estado||'—'}</b><br><br><b>Identificado em:</b> ${fmtDate(p.data_hora_local)}<br><b>Idade do foco:</b> ${age}<br><b>Risco:</b> ${p.classe_risco||'—'}<br><b>PRF:</b> ${p.prf_mw??'—'} MW<br><b>Uso do solo:</b> ${p.uso_solo||p.classe_mapbiomas||'—'}<br><b>Satélite:</b> ${p.satelite||'—'}${isPriority(p)?'<br><br><b class="alert-text">⚠ Foco prioritário para atenção</b>':''}`
 }
 
+function bringFocosForward(){
+  if(S.layers.focos && S.map.hasLayer(S.layers.focos)){S.layers.focos.removeFrom(S.map);S.layers.focos.addTo(S.map)}
+  if(S.layers.focosPriority)S.layers.focosPriority.eachLayer(l=>{if(l.setZIndexOffset)l.setZIndexOffset(1000)});
+}
 function renderFocos(){
   S.layers.focosNormal.clearLayers();
   S.layers.focosPriority.clearLayers();
@@ -184,6 +189,7 @@ function renderFocos(){
     m.on('click',()=>{m.bindPopup(popupHtml(p),{maxWidth:320}).openPopup();if(S.env==='maranhao')drawer(f)});
     m.addTo(priority?S.layers.focosPriority:S.layers.focosNormal);
   }
+  bringFocosForward();
   if($('mapCount'))$('mapCount').textContent=nf.format(S.filtered.length)+' focos';
   if($('kernelOn')?.checked)renderHeat();
 }
@@ -276,13 +282,13 @@ async function loadGeo(key){
 
 async function toggleGeo(key,on,style,nameType){
   if(S.layers[key]){
-    if(on)S.layers[key].addTo(S.map);else S.map.removeLayer(S.layers[key]);
+    if(on){S.layers[key].addTo(S.map);bringFocosForward()}else S.map.removeLayer(S.layers[key]);
     return
   }
   if(!on)return;
   try{
     const g=await loadGeo(key);
-    S.layers[key]=L.geoJSON(g,{style,onEachFeature:(f,l)=>{const n=propName(featureProps(f),nameType);l.bindTooltip(n,{sticky:true,className:'territory-label'})}}).addTo(S.map)
+    S.layers[key]=L.geoJSON(g,{interactive:false,style,onEachFeature:(f,l)=>{const n=propName(featureProps(f),nameType);l.bindTooltip(n,{sticky:true,className:'territory-label'})}}).addTo(S.map);bringFocosForward()
   }catch(e){
     alert('Não foi possível carregar '+PATH[key]+'\n'+e.message)
   }
@@ -294,6 +300,7 @@ async function drawChoropleth(){
     if(S.layers.choro)S.map.removeLayer(S.layers.choro);
     const counts=countBy((S.env==='maranhao'?S.all.filter(isMA):S.filtered),f=>normalize(focusProps(f).municipio));
     S.layers.choro=L.geoJSON(g,{
+      interactive:false,
       style:f=>{
         const n=counts[normalize(propName(featureProps(f),'mun'))]||0;
         const c=n>50?'#a50f15':n>20?'#de2d26':n>10?'#fb6a4a':n>5?'#fcae91':n>0?'#fdd0c2':'#fff5f0';
@@ -304,7 +311,7 @@ async function drawChoropleth(){
         l.bindTooltip(`${name}: ${nf.format(n)} focos`,{sticky:true})
       }
     });
-    if($('choroOn')?.checked)S.layers.choro.addTo(S.map)
+    if($('choroOn')?.checked){S.layers.choro.addTo(S.map);bringFocosForward()}
   }catch(e){alert('Erro na malha municipal: '+e.message)}
 }
 
@@ -370,7 +377,7 @@ function setEnv(env){
 
 async function toggleEventLayer(kind,on){
   const key=kind==='active'?'eventActive':'eventObs', id=kind==='active'?'eventActiveOn':'eventObsOn';
-  if(S.layers[key]){on?S.layers[key].addTo(S.map):S.map.removeLayer(S.layers[key]);return}
+  if(S.layers[key]){if(on){S.layers[key].addTo(S.map);bringFocosForward()}else S.map.removeLayer(S.layers[key]);return}
   if(!on)return;
   const status=$('eventLayerStatus');
   if(status)status.textContent='Eventos: carregando camada...';
@@ -378,6 +385,8 @@ async function toggleEventLayer(kind,on){
     const g=await loadGeo(key);
     const active=kind==='active';
     S.layers[key]=L.geoJSON(g,{
+      filter:f=>{const p=featureProps(f);return normalize(val(p,'estados','estado','UF','uf')||'').includes('MARANHAO') || /(^|[,;\s])MA([,;\s]|$)/.test(normalize(val(p,'estados','estado','UF','uf')||''))},
+      interactive:false,
       style:{color:active?'#c62828':'#ef6c00',weight:2,dashArray:active?null:'7,5',fillColor:active?'#ef5350':'#ffb74d',fillOpacity:.10},
       onEachFeature:(f,l)=>{
         const p=featureProps(f);
@@ -386,7 +395,7 @@ async function toggleEventLayer(kind,on){
         const dur=val(p,'duracao','DURACAO','duracao_dias');
         l.bindPopup(`<b>${active?'Evento ativo':'Evento em observação'}</b><br><b>ID:</b> ${eid}${area!=null?`<br><b>Área estimada:</b> ${area} ha`:''}${dur!=null?`<br><b>Duração:</b> ${dur}`:''}`)
       }
-    }).addTo(S.map);
+    }).addTo(S.map);bringFocosForward();
     if(status)status.textContent='Eventos: camada carregada'
   }catch(e){
     if($(id))$(id).checked=false;
@@ -421,8 +430,8 @@ function wire(){
     refreshMunicipios();
     applyFilters()
   };
-  if($('focosOn'))$('focosOn').onchange=e=>e.target.checked?S.layers.focos.addTo(S.map):S.map.removeLayer(S.layers.focos);
-  if($('kernelOn'))$('kernelOn').onchange=renderHeat;$('usoSoloOn').onchange=renderFocos;
+  if($('focosOn'))$('focosOn').onchange=e=>{if(e.target.checked){S.layers.focos.addTo(S.map);bringFocosForward()}else S.map.removeLayer(S.layers.focos)};
+  if($('kernelOn'))$('kernelOn').onchange=renderHeat;
   if($('eventActiveOn'))$('eventActiveOn').onchange=e=>toggleEventLayer('active',e.target.checked);
   if($('eventObsOn'))$('eventObsOn').onchange=e=>toggleEventLayer('obs',e.target.checked);
   if($('hillshadeOn'))$('hillshadeOn').onchange=e=>e.target.checked?S.layers.hillshade.addTo(S.map):S.map.removeLayer(S.layers.hillshade);
@@ -431,7 +440,7 @@ function wire(){
   if($('tiOn'))$('tiOn').onchange=e=>toggleGeo('ti',e.target.checked,{color:'#7b4ca5',weight:2,fillOpacity:.07},'ti');
   if($('ucEstOn'))$('ucEstOn').onchange=e=>toggleGeo('ucEst',e.target.checked,{color:'#e0aa2f',weight:2,dashArray:'6,4',fillOpacity:.04},'uc');
   if($('ucFedOn'))$('ucFedOn').onchange=e=>toggleGeo('ucFed',e.target.checked,{color:'#2b8a5a',weight:2,dashArray:'6,4',fillOpacity:.04},'uc');
-  if($('roadsOn'))$('roadsOn').onchange=e=>toggleGeo('road',e.target.checked,{color:'#c0392b',weight:2,opacity:.8},'other');
+  if($('roadsOn'))$('roadsOn').onchange=e=>toggleGeo('road',e.target.checked,{color:'#c0392b',weight:2,opacity:.8},'road');
   if($('energyOn'))$('energyOn').onchange=e=>toggleGeo('energy',e.target.checked,{color:'#7a5c00',weight:2,opacity:.8,dashArray:'4,3'},'other');
   if($('choroOn'))$('choroOn').onchange=e=>e.target.checked?drawChoropleth():S.layers.choro&&S.map.removeLayer(S.layers.choro);
   document.querySelectorAll('input[name=base]').forEach(r=>r.onchange=e=>{
@@ -470,7 +479,7 @@ async function boot(){
     if($('updated'))$('updated').textContent='Última atualização do banco: '+new Date(status.ultima_atualizacao_banco||status.gerado_em).toLocaleString('pt-BR');
     if($('statusBadge'))$('statusBadge').textContent='● '+(status.status||'Atualizado');
     setupFilters();
-    setEnv('brasil')
+    setEnv('maranhao')
   }catch(e){
     console.error(e);
     alert('Erro ao carregar a plataforma: '+e.message)
