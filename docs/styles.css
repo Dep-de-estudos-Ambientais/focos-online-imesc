@@ -154,3 +154,20 @@ canvas{box-sizing:border-box}
 .legendbox span{display:flex!important;align-items:center;gap:5px;white-space:nowrap}
 .priority-pulse{animation:priorityPulseV4 1.35s ease-in-out infinite!important}
 .priority-pulse:after{display:block!important;content:""!important;animation:priorityHaloV4 1.35s ease-out infinite!important}
+
+/* V4.2: legenda legível, respiro e hierarquia visual */
+.legendbox{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px;margin:10px 0 16px!important}
+.legendbox span{display:flex!important;align-items:center!important;gap:8px!important;font-size:12px!important;white-space:nowrap}
+.legendbox i{display:inline-block!important;flex:0 0 13px!important;width:13px!important;height:13px!important;min-width:13px!important;border-radius:50%!important;border:1px solid #0002!important}
+.layers{padding:13px 15px!important}
+.layers h3{margin:20px 0 11px!important;font-size:13px;line-height:1.35}
+.layers h3:first-child{margin-top:5px!important}
+.layers label{margin:11px 0!important;line-height:1.45}
+.layers .recorte{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.toolbar{gap:14px!important;align-items:center!important;padding:16px!important}
+.toolbar label{gap:7px!important}
+.toolbar .env-switch{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:5px 14px 5px 0;margin-right:4px;border-right:1px solid var(--line)}
+.toolbar .env-switch b{margin-right:5px}
+.toolbar [data-env]{padding:12px 19px!important;min-height:43px}
+.leaflet-pane.leaflet-dadosTerritoriais-pane{pointer-events:none}
+.leaflet-pane.leaflet-focosPane-pane,.leaflet-pane.leaflet-prioridadePane-pane{pointer-events:auto}
