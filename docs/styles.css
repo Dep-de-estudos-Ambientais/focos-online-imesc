@@ -1,0 +1,184 @@
+:root{--red:#f44b40;--orange:#ff8a4c;--bg:#f4f6f8;--line:#e4e7eb;--muted:#65717e}
+*{box-sizing:border-box}
+html,body{min-height:100%;overflow-x:hidden}
+body{margin:0;background:var(--bg);font:14px Arial,sans-serif;color:#1f252b}
+header{background:linear-gradient(110deg,var(--red),var(--orange));color:#fff;padding:15px 3%;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}.brand img{width:72px;border-radius:12px}.brand h1{margin:4px 0;font-size:24px}.brand span,.brand small{font-size:12px}
+.badge{border:1px solid #ffffff80;border-radius:18px;padding:8px 12px}
+main{width:94%;max-width:1600px;margin:12px auto 40px}
+.toolbar,.territorial-filter,.panel,.mapsec,.cards{background:#fff;border-radius:15px;box-shadow:0 5px 18px #0000000d}
+.toolbar,.territorial-filter{padding:12px;display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.toolbar label,.territorial-filter label{display:grid;gap:5px;font-size:11px;font-weight:700}
+.toolbar select,.territorial-filter select{min-width:130px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff}
+.toolbar button,.territorial-filter button,.env button{padding:8px 11px;border:0;border-radius:7px;cursor:pointer}
+.env b{display:block;margin-bottom:6px}.env button.active{background:var(--red);color:#fff}
+.territorial-filter{margin-top:10px;border-left:4px solid var(--red)}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;padding:12px;margin-top:10px}
+.card{border:1px solid var(--line);border-top:3px solid var(--red);border-radius:11px;padding:11px;min-height:96px}
+.card-title{display:flex;align-items:center;gap:7px;min-height:24px}.card-title span{font-size:18px;line-height:1}.card-title b{font-size:11px;line-height:1.2}
+.card strong{display:block;font-size:21px;margin:7px 0 2px}.card small{display:block;color:var(--muted);margin-top:6px;font-size:9px}
+.mapsec{display:grid;grid-template-columns:205px minmax(0,1fr);gap:10px;padding:10px;margin-top:10px}
+.layers{padding:8px;overflow:auto;max-height:680px}.layers h3{margin:6px 0 9px}.layers label{display:block;margin:8px 0;font-size:12px}.layers hr{border:0;border-top:1px solid var(--line);margin:12px 0}.layers small{display:block;color:var(--muted);margin:5px 0 8px;line-height:1.35}.layers>strong{font-size:22px}
+.legend{display:grid;gap:4px;margin-top:6px;font-size:10px}.legend span{display:flex;align-items:center;gap:6px}.legend i{width:10px;height:10px;border-radius:50%}
+.critico{background:#c53a32}.alto{background:#e4772a}.medio{background:#e0aa2f}.baixo{background:#63a85b}.minimo{background:#42a5a5}.sem{background:#7b8794}
+#map{height:680px;min-height:680px;max-height:680px;border-radius:11px}
+.panel{padding:14px;margin-top:10px;min-width:0}.panel h2{font-size:17px;margin:2px 0 12px}.panel h3{font-size:13px}
+.compare-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;height:290px;overflow:hidden}
+.analytics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.protected-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.events{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.event{border:1px solid var(--line);border-radius:9px;padding:10px}.event small{display:block;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:7px;border-bottom:1px solid var(--line);text-align:left}
+.hidden{display:none!important}
+.drawer{position:fixed;right:0;top:0;width:min(480px,96vw);height:100vh;background:#fff;z-index:3000;box-shadow:-10px 0 30px #0003;padding:18px;overflow:auto;transform:translateX(103%);transition:.25s}
+.drawer.open{transform:translateX(0)}#closeDrawer{float:right;border:0;background:#eee;border-radius:50%;width:34px;height:34px;font-size:20px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.detail{background:#f7f8fa;border-radius:8px;padding:9px}.detail b{display:block;font-size:10px;color:var(--muted);margin-bottom:3px}
+.loading{position:fixed;inset:0;background:#ffffffdf;z-index:5000;display:flex;gap:12px;align-items:center;justify-content:center}
+.spinner{width:22px;height:22px;border:3px solid #ddd;border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.leaflet-tooltip.territory-label{background:#ffffffdd;border:0;box-shadow:none;font-size:9px;font-weight:700}
+.line-key{display:inline-block;width:24px;height:0;border-top:2px dashed;margin-left:5px;vertical-align:middle}.uc-est{border-color:#e0aa2f}.uc-fed{border-color:#2b8a5a}
+.alert-text{color:#b3261e}.priority-banner{background:#fff3e0;border-left:4px solid #e4772a;padding:10px;margin:8px 0 12px;border-radius:7px;font-weight:700}
+.report-text{margin-top:14px;padding:12px;background:#f7f8fa;border-radius:10px;line-height:1.55}.report-text h3{margin:0 0 7px}.report-text p{margin:0}.report-text small{display:block;margin-top:8px;color:var(--muted)}
+button.secondary{background:#eef2f4;color:#263238;border:1px solid #cfd8dc}.panel-note{color:#607d8b;margin-top:-6px}
+.event-poly-active{filter:drop-shadow(0 0 3px rgba(198,40,40,.25))}.event-poly-obs{filter:drop-shadow(0 0 3px rgba(239,108,0,.2))}
+.report-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.report-actions button{padding:7px 10px}.source-note{font-size:12px;color:#65737e}
+
+/* Focos prioritários: sem animação para eliminar repaints contínuos */
+.priority-wrap{background:transparent!important;border:0!important}
+.priority-pulse{position:relative!important;display:block!important;width:14px!important;height:14px!important;border-radius:50%!important;background:var(--risk)!important;border:2px solid #fff!important;box-shadow:0 0 0 2px var(--risk)!important;animation:none!important}
+.priority-pulse:after{display:none!important;content:none!important;animation:none!important}
+
+/* =========================================================
+   ESTABILIDADE DOS GRÁFICOS
+   O Chart.js usa responsive:false; CSS define a caixa visual.
+   ========================================================= */
+.analytics .panel,
+.aligned-charts .panel{
+  height:330px!important;
+  min-height:330px!important;
+  max-height:330px!important;
+  overflow:hidden!important;
+  display:flex;
+  flex-direction:column;
+}
+.compare-grid>div{
+  height:280px!important;
+  min-height:280px!important;
+  max-height:280px!important;
+  overflow:hidden!important;
+}
+.analytics .panel canvas,
+.aligned-charts .panel canvas,
+.compare-grid canvas{
+  display:block!important;
+  width:100%!important;
+  height:260px!important;
+  max-width:100%!important;
+  max-height:260px!important;
+  min-height:0!important;
+  flex:none!important;
+}
+canvas{box-sizing:border-box}
+
+/* Evita transições/efeitos que provoquem repaints desnecessários no painel principal */
+.analytics canvas,.compare-grid canvas{transition:none!important}
+
+@media(max-width:1100px){
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .compare-grid{grid-template-columns:1fr;height:auto!important;overflow:visible}
+  .compare-grid>div{height:280px!important;min-height:280px!important;max-height:280px!important}
+  .mapsec{grid-template-columns:1fr}
+  .layers{max-height:none}
+  .analytics{grid-template-columns:1fr}
+  .events{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:650px){
+  header{align-items:flex-start}.brand img{width:55px}.brand h1{font-size:18px}.badge{display:none}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  main{width:97%}
+  #map{height:520px;min-height:520px;max-height:520px}
+  .protected-grid,.events{grid-template-columns:1fr}
+  .analytics .panel,.aligned-charts .panel{height:310px!important;min-height:310px!important;max-height:310px!important}
+  .analytics .panel canvas,.aligned-charts .panel canvas,.compare-grid canvas{height:240px!important;max-height:240px!important}
+}
+
+/* =========================================================
+   V4 — ANÁLISE TÉCNICA, DENSIDADE E FOCO PRIORITÁRIO
+   ========================================================= */
+.report-text p{
+  text-align:justify;
+  text-justify:inter-word;
+  line-height:1.72;
+  hyphens:auto;
+}
+.report-text h3{font-size:15px;color:#263238}
+.report-text small{line-height:1.45}
+
+/* Pulsação leve somente para os poucos focos prioritários.
+   Usa transform/opacity, sem alterar dimensões do layout. */
+.priority-pulse{
+  animation:priorityPulseV4 1.35s ease-in-out infinite!important;
+  transform-origin:center center;
+  will-change:transform,opacity;
+}
+.priority-pulse:after{
+  display:block!important;
+  content:""!important;
+  position:absolute;
+  inset:-6px;
+  border:2px solid var(--risk);
+  border-radius:50%;
+  animation:priorityHaloV4 1.35s ease-out infinite!important;
+  pointer-events:none;
+}
+@keyframes priorityPulseV4{
+  0%,100%{transform:scale(.92);opacity:.78}
+  50%{transform:scale(1.18);opacity:1}
+}
+@keyframes priorityHaloV4{
+  0%{transform:scale(.55);opacity:.75}
+  100%{transform:scale(1.35);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .priority-pulse,.priority-pulse:after{animation:none!important}
+}
+
+.mapbiomas-note{font-size:10px;color:var(--muted);line-height:1.35;margin:6px 0 8px}
+.use-legend{display:grid;grid-template-columns:1fr;gap:3px;margin-top:6px}
+.use-legend span{display:flex;align-items:center;gap:6px;font-size:10px}
+.use-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;flex:0 0 auto}
+
+/* Ajustes V4.1 */
+.toolbar [data-env]{font-weight:800;font-size:14px;padding:11px 17px;border:2px solid #b9c5cd;background:#f4f7f9;color:#263238;box-shadow:0 2px 5px #0001}
+.toolbar [data-env].active{background:#a52822;color:#fff;border-color:#a52822;box-shadow:0 2px 8px #a5282240}
+.legendbox{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px}
+.legendbox span{display:flex!important;align-items:center;gap:5px;white-space:nowrap}
+.priority-pulse{animation:priorityPulseV4 1.35s ease-in-out infinite!important}
+.priority-pulse:after{display:block!important;content:""!important;animation:priorityHaloV4 1.35s ease-out infinite!important}
+
+/* V4.2: legenda legível, respiro e hierarquia visual */
+.legendbox{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px;margin:10px 0 16px!important}
+.legendbox span{display:flex!important;align-items:center!important;gap:8px!important;font-size:12px!important;white-space:nowrap}
+.legendbox i{display:inline-block!important;flex:0 0 13px!important;width:13px!important;height:13px!important;min-width:13px!important;border-radius:50%!important;border:1px solid #0002!important}
+.layers{padding:13px 15px!important}
+.layers h3{margin:20px 0 11px!important;font-size:13px;line-height:1.35}
+.layers h3:first-child{margin-top:5px!important}
+.layers label{margin:11px 0!important;line-height:1.45}
+.layers .recorte{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.toolbar{gap:14px!important;align-items:center!important;padding:16px!important}
+.toolbar label{gap:7px!important}
+.toolbar .env-switch{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:5px 14px 5px 0;margin-right:4px;border-right:1px solid var(--line)}
+.toolbar .env-switch b{margin-right:5px}
+.toolbar [data-env]{padding:12px 19px!important;min-height:43px}
+.leaflet-pane.leaflet-dadosTerritoriais-pane{pointer-events:none}
+.leaflet-pane.leaflet-focosPane-pane,.leaflet-pane.leaflet-prioridadePane-pane{pointer-events:auto}
+
+/* Mapa MapBiomas categórico: não intercepta os focos */
+.leaflet-mapbiomasPane{pointer-events:none!important}
+#mapbiomasPanel{margin:14px 0;padding:10px 8px;border:1px solid #dfe6e8;border-radius:9px;background:#f8faf9}
+#mapbiomasPanel h3{line-height:1.4;margin:0 0 10px}
+.opacity-control{display:flex!important;flex-direction:column;gap:6px;margin:12px 0!important}
+.opacity-control input{width:100%}
+.mapbiomas-legend{max-height:255px;overflow:auto;border-top:1px solid #dfe6e8;padding-top:10px;margin-top:12px;display:grid;gap:7px;font-size:11px}
+.mapbiomas-legend span{display:flex;align-items:center;gap:7px;line-height:1.2}
+.mapbiomas-legend i{display:inline-block;width:13px;height:13px;min-width:13px;border:1px solid #0002;border-radius:2px}
+.mapbiomas-legend small{line-height:1.4}
