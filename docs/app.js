@@ -497,3 +497,89 @@ async function boot(){
   }
 }
 boot();
+// ============================================================
+// HISTÓRICO DE ATUALIZAÇÕES — RODAPÉ (4 REGISTROS)
+// Não depende do carregamento dos GeoJSON ou da inicialização do mapa.
+// ============================================================
+(function iniciarRodapeHistorico() {
+  const css = `
+    #fo-historico-rodape{background:#152b3c;color:#e6eef3;padding:20px 18px;margin-top:24px;font:13px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif;clear:both}
+    #fo-historico-rodape .fo-hist-inner{max-width:1200px;margin:auto}
+    #fo-historico-rodape .fo-hist-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    #fo-historico-rodape h2{font-size:15px;color:#fff;margin:0;font-weight:700}
+    #fo-historico-rodape a{color:#a7ddff;text-decoration:underline}
+    #fo-historico-rodape .fo-hist-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px}
+    #fo-historico-rodape .fo-hist-item{border:1px solid #496273;background:#203b4c;border-radius:9px;padding:10px;min-width:0}
+    #fo-historico-rodape .fo-hist-item strong{display:block;color:#fff;overflow-wrap:anywhere}
+    #fo-historico-rodape .fo-hist-item small{display:block;color:#bfd0da;margin:3px 0}
+    #fo-historico-rodape .fo-hist-item span{display:block;overflow-wrap:anywhere}
+    #fo-historico-rodape .fo-hist-status{font-size:11px;font-weight:700;color:#b8ebca}
+    #fo-historico-rodape .fo-hist-status.error{color:#ffb5ad}
+    #fo-historico-rodape .fo-hist-status.wait{color:#ffdf9d}
+  `;
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
+
+  function montar() {
+    if (document.getElementById('fo-historico-rodape')) return;
+    const footer = document.createElement('footer');
+    footer.id = 'fo-historico-rodape';
+    footer.innerHTML = '<div class="fo-hist-inner"><div class="fo-hist-header"><h2>Histórico de atualizações</h2><a href="historico.html">Ver histórico completo →</a></div><div class="fo-hist-list" id="fo-hist-list" aria-live="polite">Carregando registros...</div></div>';
+    document.body.appendChild(footer);
+    carregar();
+  }
+
+  function horario(v) {
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? 'Data não informada' :
+      new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Fortaleza'
+      }).format(d);
+  }
+
+  async function carregar() {
+    const lista = document.getElementById('fo-hist-list');
+    if (!lista) return;
+    try {
+      const resposta = await fetch('data/historico_atualizacoes.json', {cache: 'no-store'});
+      if (!resposta.ok) throw new Error('HTTP ' + resposta.status);
+      const dados = await resposta.json();
+      const eventos = Array.isArray(dados.historico) ? dados.historico :
+        (Array.isArray(dados.ultimas_atualizacoes) ? dados.ultimas_atualizacoes : []);
+      eventos.sort((a,b) => new Date(b.data_hora || 0) - new Date(a.data_hora || 0));
+      lista.replaceChildren();
+      if (!eventos.length) {
+        lista.textContent = 'Nenhuma atualização registrada até o momento.';
+        return;
+      }
+      for (const evento of eventos.slice(0, 4)) {
+        const item = document.createElement('div');
+        item.className = 'fo-hist-item';
+        const titulo = document.createElement('strong');
+        titulo.textContent = String(evento.tipo ?? 'Operação');
+        const data = document.createElement('small');
+        data.textContent = horario(evento.data_hora);
+        const situacao = document.createElement('div');
+        situacao.className = 'fo-hist-status';
+        situacao.textContent = String(evento.situacao ?? 'Não informada');
+        const s = situacao.textContent.toLowerCase();
+        if (/erro|falha|error/.test(s)) situacao.classList.add('error');
+        else if (/aguard|ignor|adiad|skip|intervalo/.test(s)) situacao.classList.add('wait');
+        const detalhe = document.createElement('span');
+        detalhe.textContent = String(evento.mensagem ?? '');
+        item.append(titulo, data, situacao, detalhe);
+        lista.appendChild(item);
+      }
+    } catch (erro) {
+      lista.textContent = 'Histórico ainda indisponível. Os demais recursos da plataforma continuam funcionando.';
+      console.warn('Histórico de atualizações:', erro);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', montar, {once: true});
+  } else {
+    montar();
+  }
+})();
