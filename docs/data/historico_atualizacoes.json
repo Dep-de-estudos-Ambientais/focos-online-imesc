@@ -1,40 +1,86 @@
 {
-  "gerado_em": "2026-10-22T16:00:33-03:00",
+  "gerado_em": "2026-10-22T20:01:19-03:00",
   "total_registros": 100,
   "ultimas_atualizacoes": [
     {
-      "data_hora": "2026-10-22T16:00:33-03:00",
+      "data_hora": "2026-10-22T20:01:19-03:00",
       "tipo": "exportacao",
       "situacao": "sucesso",
       "mensagem": "Cinco arquivos da plataforma gerados localmente.",
-      "ciclo_id": "ebfc8d7e253a",
+      "ciclo_id": "d6046cd1161a",
       "arquivos_exportados": 5
     },
     {
-      "data_hora": "2026-10-22T14:00:26-03:00",
+      "data_hora": "2026-10-22T18:02:00-03:00",
       "tipo": "processamento",
       "situacao": "sucesso",
       "mensagem": "Processamento do ciclo concluído.",
-      "ciclo_id": "443b30b8cb6f",
-      "duracao_segundos": 20.9
+      "ciclo_id": "a08f18422d05",
+      "duracao_segundos": 116.0
     },
     {
-      "data_hora": "2026-10-22T14:00:26-03:00",
+      "data_hora": "2026-10-22T18:02:00-03:00",
       "tipo": "publicacao",
       "situacao": "adiada_ou_sem_alteracoes",
       "mensagem": "Sem envio neste ciclo: intervalo de quatro horas ou arquivos sem alterações.",
-      "ciclo_id": "443b30b8cb6f"
+      "ciclo_id": "a08f18422d05"
     },
     {
-      "data_hora": "2026-10-22T14:00:26-03:00",
+      "data_hora": "2026-10-22T18:02:00-03:00",
       "tipo": "exportacao",
       "situacao": "sucesso",
       "mensagem": "Cinco arquivos da plataforma gerados localmente.",
-      "ciclo_id": "443b30b8cb6f",
+      "ciclo_id": "a08f18422d05",
       "arquivos_exportados": 5
     }
   ],
   "historico": [
+    {
+      "data_hora": "2026-10-22T20:01:19-03:00",
+      "tipo": "exportacao",
+      "situacao": "sucesso",
+      "mensagem": "Cinco arquivos da plataforma gerados localmente.",
+      "ciclo_id": "d6046cd1161a",
+      "arquivos_exportados": 5
+    },
+    {
+      "data_hora": "2026-10-22T18:02:00-03:00",
+      "tipo": "processamento",
+      "situacao": "sucesso",
+      "mensagem": "Processamento do ciclo concluído.",
+      "ciclo_id": "a08f18422d05",
+      "duracao_segundos": 116.0
+    },
+    {
+      "data_hora": "2026-10-22T18:02:00-03:00",
+      "tipo": "publicacao",
+      "situacao": "adiada_ou_sem_alteracoes",
+      "mensagem": "Sem envio neste ciclo: intervalo de quatro horas ou arquivos sem alterações.",
+      "ciclo_id": "a08f18422d05"
+    },
+    {
+      "data_hora": "2026-10-22T18:02:00-03:00",
+      "tipo": "exportacao",
+      "situacao": "sucesso",
+      "mensagem": "Cinco arquivos da plataforma gerados localmente.",
+      "ciclo_id": "a08f18422d05",
+      "arquivos_exportados": 5
+    },
+    {
+      "data_hora": "2026-10-22T16:00:47-03:00",
+      "tipo": "processamento",
+      "situacao": "sucesso",
+      "mensagem": "Processamento do ciclo concluído.",
+      "ciclo_id": "ebfc8d7e253a",
+      "duracao_segundos": 35.2
+    },
+    {
+      "data_hora": "2026-10-22T16:00:47-03:00",
+      "tipo": "publicacao",
+      "situacao": "sucesso",
+      "mensagem": "Dados enviados ao GitHub; aguardando disponibilização no Pages.",
+      "ciclo_id": "ebfc8d7e253a"
+    },
     {
       "data_hora": "2026-10-22T16:00:33-03:00",
       "tipo": "exportacao",
@@ -754,52 +800,6 @@
       "situacao": "sucesso",
       "mensagem": "Cinco arquivos da plataforma gerados localmente.",
       "ciclo_id": "fcad9610cb38",
-      "arquivos_exportados": 5
-    },
-    {
-      "data_hora": "2026-10-20T00:01:22-03:00",
-      "tipo": "processamento",
-      "situacao": "sucesso",
-      "mensagem": "Processamento do ciclo concluído.",
-      "ciclo_id": "0f8f6d641b33",
-      "duracao_segundos": 73.8
-    },
-    {
-      "data_hora": "2026-10-20T00:01:22-03:00",
-      "tipo": "publicacao",
-      "situacao": "sucesso",
-      "mensagem": "Dados enviados ao GitHub; aguardando disponibilização no Pages.",
-      "ciclo_id": "0f8f6d641b33"
-    },
-    {
-      "data_hora": "2026-10-20T00:01:00-03:00",
-      "tipo": "exportacao",
-      "situacao": "sucesso",
-      "mensagem": "Cinco arquivos da plataforma gerados localmente.",
-      "ciclo_id": "0f8f6d641b33",
-      "arquivos_exportados": 5
-    },
-    {
-      "data_hora": "2026-10-19T22:00:42-03:00",
-      "tipo": "processamento",
-      "situacao": "sucesso",
-      "mensagem": "Processamento do ciclo concluído.",
-      "ciclo_id": "2e6f17647a08",
-      "duracao_segundos": 29.6
-    },
-    {
-      "data_hora": "2026-10-19T22:00:42-03:00",
-      "tipo": "publicacao",
-      "situacao": "adiada_ou_sem_alteracoes",
-      "mensagem": "Sem envio neste ciclo: intervalo de quatro horas ou arquivos sem alterações.",
-      "ciclo_id": "2e6f17647a08"
-    },
-    {
-      "data_hora": "2026-10-19T22:00:42-03:00",
-      "tipo": "exportacao",
-      "situacao": "sucesso",
-      "mensagem": "Cinco arquivos da plataforma gerados localmente.",
-      "ciclo_id": "2e6f17647a08",
       "arquivos_exportados": 5
     }
   ]
